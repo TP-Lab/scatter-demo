@@ -1,30 +1,41 @@
 <template>
   <div class="hello">
+    <p>
+      <button @click="queryTPT">Query without Scatter</button>
+    </p>
+    <hr>
     <div v-if="scatter">
       <p v-if="!currentAccount">
         <button @click="login">Login</button>
       </p>
 
-      <p v-else>
+      <div v-else>
         {{currentAccount}}
         <button @click="logout">Logout</button>
-        <br>
-        <br>
-        <button @click="send">send EOS to TokenPocket</button>
-        <br>
-        <br>
-        <button @click="airgrab">airgrab POOR</button>
-        <br>
-        <br>
-        <button @click="airgrabContract">another way to airgrab POOR</button>
-      </p>
+        <hr>
+        <p>
+          <button @click="send">Demo 1: Transfer EOS to TokenPocket</button>
+        </p>
+        <p>
+          <button @click="vote">Demo 2: Vote for us (itokenpocket)</button>
+        </p>
+        <p>
+          <button @click="airgrabContract">Demo 3: Airgrab POOR</button>
+        </p>
+        <p>
+          <button @click="getMyBalance">Demo 4: Get My EOS Balance</button>
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import ScatterJS from "scatter-js/dist/scatter.esm";
 import Eos from "eosjs";
+import ScatterJS from "scatterjs-core";
+import ScatterEOS from "scatterjs-plugin-eosjs";
+
+ScatterJS.plugins(new ScatterEOS());
 
 const network = {
   blockchain: "eos",
@@ -34,31 +45,46 @@ const network = {
   chainId: "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906"
 };
 
+const requiredFields = { accounts: [network] };
+
 export default {
   name: "HelloWorld",
   data() {
     return {
       currentAccount: "",
       scatter: null,
-      eosClient: null
+      eosClient: null,
+      readOnlyEos: null
     };
   },
   created() {
+    let chainId = network.chainId;
+    let httpEndpoint =
+      network.protocol + "://" + network.host + ":" + network.port;
+
+    this.readOnlyEos = Eos({
+      chainId,
+      httpEndpoint
+    });
+
     ScatterJS.scatter.connect("scatter-demo").then(connected => {
       // User does not have Scatter Desktop, Mobile or Classic installed.
       if (!connected) return false;
 
       this.scatter = ScatterJS.scatter;
 
-      const requiredFields = { accounts: [network] };
-
       window.scatter = null;
     });
   },
   methods: {
+    queryTPT() {
+      this.readOnlyEos
+        .getTableRows(true, "eosiotptoken", "eosiotptoken", "global")
+        .then(data => {
+          alert("TPT Total Staked: " + data.rows[0].total_delegate_quantity);
+        });
+    },
     login() {
-      const requiredFields = { accounts: [network] };
-
       this.scatter
         .getIdentity(requiredFields)
         .then(() => {
@@ -72,13 +98,14 @@ export default {
 
           this.eosClient = this.scatter.eos(network, Eos, eosOptions);
         })
-        .catch(error => {
-          alert(JSON.stringify(error));
+        .catch(err => {
+          alert(JSON.stringify(err));
         });
     },
     logout() {
       this.scatter.forgetIdentity();
       this.currentAccount = null;
+      this.currentPermission = null;
     },
     send() {
       this.eosClient
@@ -89,19 +116,20 @@ export default {
           "from scatter-demo"
         )
         .then(data => {
-          alert(JSON.stringify(data));
+          alert("succeed");
+          console.log(data);
         })
-        .catch(error => {
-          alert(JSON.stringify(error));
+        .catch(err => {
+          alert(JSON.stringify(err));
         });
     },
-    airgrab() {
+    vote() {
       this.eosClient
         .transaction({
           actions: [
             {
-              account: "poormantoken",
-              name: "signup",
+              account: "eosio",
+              name: "voteproducer",
               authorization: [
                 {
                   actor: this.currentAccount,
@@ -109,8 +137,9 @@ export default {
                 }
               ],
               data: {
-                owner: this.currentAccount,
-                quantity: "0.0000 POOR"
+                voter: this.currentAccount,
+                proxy: "",
+                producers: ["itokenpocket"]
               }
             }
           ]
@@ -120,7 +149,7 @@ export default {
           console.log(data);
         })
         .catch(err => {
-          alert(err);
+          alert(JSON.stringify(err));
         });
     },
     airgrabContract() {
@@ -132,9 +161,16 @@ export default {
             console.log(data);
           })
           .catch(err => {
-            alert(err);
+            alert(JSON.stringify(err));
           });
       });
+    },
+    getMyBalance() {
+      this.eosClient
+        .getCurrencyBalance("eosio.token", this.currentAccount, "EOS")
+        .then(data => {
+          alert(this.currentAccount + ": " + data[0]);
+        });
     }
   }
 };
@@ -142,4 +178,13 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+button {
+  padding: 6px 12px;
+}
+
+hr {
+  width: 90%;
+  border: none;
+  border-top: 1px solid #f1f1f1;
+}
 </style>
