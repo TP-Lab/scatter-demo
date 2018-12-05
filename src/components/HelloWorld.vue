@@ -45,6 +45,9 @@ const network = {
   chainId: "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906"
 };
 
+// Put eosClient in data will case a weird problem in scatter-desktop.
+let eosClient = null;
+
 const requiredFields = { accounts: [network] };
 
 export default {
@@ -53,7 +56,6 @@ export default {
     return {
       currentAccount: "",
       scatter: null,
-      eosClient: null,
       readOnlyEos: null
     };
   },
@@ -74,6 +76,7 @@ export default {
       this.scatter = ScatterJS.scatter;
 
       window.scatter = null;
+      window.ScatterJS = null;
     });
   },
   methods: {
@@ -93,10 +96,7 @@ export default {
           );
           this.currentAccount = account.name;
           this.currentPermission = account.authority;
-
-          const eosOptions = { expireInSeconds: 60 };
-
-          this.eosClient = this.scatter.eos(network, Eos, eosOptions);
+          eosClient = this.scatter.eos(network, Eos);
         })
         .catch(err => {
           alert(JSON.stringify(err));
@@ -108,7 +108,7 @@ export default {
       this.currentPermission = null;
     },
     send() {
-      this.eosClient
+      eosClient
         .transfer(
           this.currentAccount,
           "itokenpocket",
@@ -124,7 +124,7 @@ export default {
         });
     },
     vote() {
-      this.eosClient
+      eosClient
         .transaction({
           actions: [
             {
@@ -153,7 +153,7 @@ export default {
         });
     },
     airgrabContract() {
-      this.eosClient.contract("poormantoken").then(contract => {
+      eosClient.contract("poormantoken").then(contract => {
         contract
           .signup(this.currentAccount, "0.0000 POOR")
           .then(data => {
@@ -166,7 +166,7 @@ export default {
       });
     },
     getMyBalance() {
-      this.eosClient
+      eosClient
         .getCurrencyBalance("eosio.token", this.currentAccount, "EOS")
         .then(data => {
           alert(this.currentAccount + ": " + data[0]);
