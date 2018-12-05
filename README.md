@@ -1,6 +1,8 @@
 # scatter-demo
 
-> A Vue.js project
+> It is a simple demo using Scatter to develop a EOS Dapp, which is complete compatible with [TokenPocket](https://www.mytokenpocket.vip/) Dapp Browser
+
+[Online Scatter Demo](https://scatter-demo.gz.bcebos.com/index.html)
 
 ## Build Setup
 
