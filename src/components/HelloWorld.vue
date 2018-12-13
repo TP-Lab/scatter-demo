@@ -25,6 +25,18 @@
         <p>
           <button @click="getMyBalance">Demo 4: Get My EOS Balance</button>
         </p>
+
+        <p>
+          <input type="text" placeholder="data to be sign" v-model="dataTobeSign">
+          <label for="is-hash">
+            <input id="is-hash" type="checkbox" v-model="isHash">
+            isHash
+          </label>
+          <input type="text" placeholder="what for" v-model="whatfor">
+        </p>
+        <p>
+          <button @click="getArbitrarySignature">Demo 5: getArbitrarySignature</button>
+        </p>
       </div>
     </div>
   </div>
@@ -54,9 +66,14 @@ export default {
   name: "HelloWorld",
   data() {
     return {
-      currentAccount: "",
+      currentAccount: null,
+      currentPermission: null,
       scatter: null,
-      readOnlyEos: null
+      readOnlyEos: null,
+      pubKey: null,
+      dataTobeSign: "",
+      whatfor: "tp-demo",
+      isHash: false
     };
   },
   created() {
@@ -94,6 +111,11 @@ export default {
           const account = this.scatter.identity.accounts.find(
             x => x.blockchain === "eos"
           );
+
+          let scatter = this.scatter;
+
+          this.pubKey = this.scatter.identity.publicKey;
+
           this.currentAccount = account.name;
           this.currentPermission = account.authority;
           eosClient = this.scatter.eos(network, Eos);
@@ -170,6 +192,21 @@ export default {
         .getCurrencyBalance("eosio.token", this.currentAccount, "EOS")
         .then(data => {
           alert(this.currentAccount + ": " + data[0]);
+        });
+    },
+    getArbitrarySignature() {
+      this.scatter
+        .getArbitrarySignature(
+          this.pubKey,
+          this.dataTobeSign || "tokenpocket",
+          this.whatfor,
+          this.isHash
+        )
+        .then(data => {
+          alert(data);
+        })
+        .catch(err => {
+          alert("error:" + err);
         });
     }
   }
