@@ -37,6 +37,12 @@
         <p>
           <button @click="getArbitrarySignature">Demo 5: getArbitrarySignature</button>
         </p>
+        <p>{{signatureForDemo5}}</p>
+
+        <p>
+          <button @click="authenticate">Demo 6: authenticate</button>
+        </p>
+        <p>{{signatureForDemo6}}</p>
       </div>
     </div>
   </div>
@@ -73,7 +79,9 @@ export default {
       pubKey: null,
       dataTobeSign: "",
       whatfor: "tp-demo",
-      isHash: false
+      isHash: false,
+      signatureForDemo5: "",
+      signatureForDemo6: ""
     };
   },
   created() {
@@ -204,10 +212,17 @@ export default {
         )
         .then(data => {
           alert(data);
+          this.signatureForDemo5 = data;
         })
         .catch(err => {
           alert("error:" + err);
         });
+    },
+    authenticate() {
+      this.scatter.authenticate().then(data => {
+        alert(data);
+        this.signatureForDemo6 = data;
+      });
     }
   }
 };
