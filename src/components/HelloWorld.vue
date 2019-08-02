@@ -1,49 +1,16 @@
 <template>
   <div class="hello">
-    <p>
-      <button @click="queryTPT">Query without Scatter</button>
-    </p>
-    <hr>
-    <div v-if="scatter">
-      <p v-if="!currentAccount">
-        <button @click="login">Login</button>
+    <div>
+      <button @click="login">Login</button>
+      {{currentAccount}}
+      <button @click="logout">Logout</button>
+      <hr>
+      <p>
+        <button @click="send">Demo 1: Transfer EOS to TokenPocket</button>
       </p>
-
-      <div v-else>
-        {{currentAccount}}
-        <button @click="logout">Logout</button>
-        <hr>
-        <p>
-          <button @click="send">Demo 1: Transfer EOS to TokenPocket</button>
-        </p>
-        <p>
-          <button @click="vote">Demo 2: Vote for us (itokenpocket)</button>
-        </p>
-        <p>
-          <button @click="airgrabContract">Demo 3: Airgrab POOR</button>
-        </p>
-        <p>
-          <button @click="getMyBalance">Demo 4: Get My EOS Balance</button>
-        </p>
-
-        <p>
-          <input type="text" placeholder="data to be sign" v-model="dataTobeSign">
-          <label for="is-hash">
-            <input id="is-hash" type="checkbox" v-model="isHash">
-            isHash
-          </label>
-          <input type="text" placeholder="what for" v-model="whatfor">
-        </p>
-        <p>
-          <button @click="getArbitrarySignature">Demo 5: getArbitrarySignature</button>
-        </p>
-        <p>{{signatureForDemo5}}</p>
-
-        <p>
-          <button @click="authenticate">Demo 6: authenticate</button>
-        </p>
-        <p>{{signatureForDemo6}}</p>
-      </div>
+      <p>
+        <button @click="vote">Demo 2: Vote for us (itokenpocket)</button>
+      </p>
     </div>
   </div>
 </template>
@@ -63,9 +30,7 @@ const network = {
   chainId: "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906"
 };
 
-// Put eosClient in data will case a weird problem in scatter-desktop.
 let eosClient = null;
-
 const requiredFields = { accounts: [network] };
 
 export default {
@@ -75,33 +40,15 @@ export default {
       currentAccount: null,
       currentPermission: null,
       scatter: null,
-      readOnlyEos: null,
-      pubKey: null,
-      dataTobeSign: "",
-      whatfor: "tp-demo",
-      isHash: false,
-      signatureForDemo5: "",
-      signatureForDemo6: ""
+      pubKey: null
     };
   },
   created() {
-    let chainId = network.chainId;
-    let httpEndpoint =
-      network.protocol + "://" + network.host + ":" + network.port;
-
-    this.readOnlyEos = Eos({
-      chainId,
-      httpEndpoint
-    });
-
     ScatterJS.scatter.connect("scatter-demo").then(connected => {
       // User does not have Scatter Desktop, Mobile or Classic installed.
       if (!connected) return false;
 
       this.scatter = ScatterJS.scatter;
-
-      window.scatter = null;
-      window.ScatterJS = null;
     });
   },
   methods: {
