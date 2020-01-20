@@ -4,9 +4,9 @@
       <button @click="login">Login</button>
       {{currentAccount}}
       <button @click="logout">Logout</button>
-      <hr>
+      <hr />
       <p>
-        <button @click="send">Demo 1: Transfer EOS to TokenPocket</button>
+        <button @click="send">Demo 1: Transfer TPT to TokenPocket</button>
       </p>
       <p>
         <button @click="vote">Demo 2: Vote for us (itokenpocket)</button>
@@ -24,7 +24,7 @@ ScatterJS.plugins(new ScatterEOS());
 
 const network = {
   blockchain: "eos",
-  host: "mainnet.eoscanada.com",
+  host: "eospush.tokenpocket.pro",
   port: 443,
   protocol: "https",
   chainId: "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906"
@@ -86,15 +86,28 @@ export default {
     },
     send() {
       eosClient
-        .transfer(
-          this.currentAccount,
-          "itokenpocket",
-          "0.0001 EOS",
-          "from scatter-demo"
-        )
-        .then(data => {
-          alert("succeed");
-          console.log(data);
+        .transaction({
+          actions: [
+            {
+              account: "eosiotptoken",
+              name: "transfer",
+              authorization: [
+                {
+                  actor: this.currentAccount,
+                  permission: this.currentPermission
+                }
+              ],
+              data: {
+                from: this.currentAccount,
+                to: "itokenpocket",
+                quantity: "0.0001 TPT",
+                memo: ""
+              }
+            }
+          ]
+        })
+        .then(res => {
+          alert("成功");
         })
         .catch(err => {
           alert(JSON.stringify(err));
