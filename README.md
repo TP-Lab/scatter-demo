@@ -4,6 +4,10 @@
 
 [Online Scatter Demo](https://scatter-demo.gz.bcebos.com/index.html)
 
+
+You may find the demo with eosjs2 here: https://github.com/TP-Lab/scatter-demo-eosjs2
+
+
 ## Build Setup
 
 ``` bash
