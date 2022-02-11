@@ -10,7 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "ajv": "^6.5.4",
+    "ajv": "^6.12.3",
     "eosjs": "^16.0.9",
     "scatterjs-core": "^2.4.0",
     "scatterjs-plugin-eosjs": "^1.4.0",
